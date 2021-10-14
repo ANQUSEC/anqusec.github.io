@@ -26,7 +26,7 @@
 
   
 
-  <title>Hello World | ꧁༺黑色༒星辰༻꧂</title>
+  <title>色站SQL注入 | ꧁༺黑色༒星辰༻꧂</title>
 
   
 
@@ -100,16 +100,22 @@
     <div class="header-content">
       <div class="post-text layout-block">
         <div class="layout-margin">
-          <h1 class="title-wrap">Hello World</h1>
+          <h1 class="title-wrap">色站SQL注入</h1>
           <h2 class="title-sub-wrap">
             <strong>ANQUSEC</strong>
             <span>发布于</span>
-            <time  class="article-date" datetime="2021-10-13T06:32:10.419Z" itemprop="datePublished">2021-10-13</time>
+            <time  class="article-date" datetime="2021-10-14T14:14:04.000Z" itemprop="datePublished">2021-10-14</time>
           </h2>
           <ul class="wrap-list dark">
   
+    <li><a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">📒 渗透测试</a></li>
+  
 </ul>
           <ul class="wrap-list dark">
+  
+    <li><a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">🏷️ 渗透测试</a></li>
+  
+    <li><a href="/tags/%E5%AE%9E%E6%88%98/">🏷️ 实战</a></li>
   
 </ul>
         </div>
@@ -133,19 +139,25 @@
       
       
       <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+        <p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/image-20211014221955589.png" alt="image-20211014221955589"></p>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/image-20211014221529535.png" alt="image-20211014221529535"></p>
+<p>指纹加注入点</p>
+<blockquote>
+<p><strong>“/video/lists.html?orderCode=lastTime&amp;tag_id=0&amp;sub_cid=0&amp;cid=”</strong></p>
+</blockquote>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/1.png" alt="1"></p>
+<p>注入参数</p>
+<blockquote>
+<p><strong>tag_id</strong></p>
+</blockquote>
+<p>注入测试成功：</p>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/image-20211014221627775.png" alt="image-20211014221627775"></p>
+<p>数据库：</p>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/image-20211014222022182.png" alt="image-20211014222022182"></p>
+<p>数据库表：</p>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/image-20211014222107597.png" alt="image-20211014222107597"></p>
+<p>到此结束</p>
+<p><img src="/2021/10/14/%E8%89%B2%E7%AB%99SQL%E6%B3%A8%E5%85%A5/OIP.jpg"></p>
 
       </section>
 
@@ -153,20 +165,20 @@
       
         <nav class="article-nav">
           
+          
             <div class="article-nav-item layout-padding">
   <article class="card-container article-nav-card content-padding--primary soft-size--large soft-style--box">
     
     <div class="card-text">
       
-        <a href="/2021/10/13/%E6%9A%97%E7%BD%91%E7%BD%91%E5%9D%80%E6%95%B4%E7%90%86/" itemprop="url">
-          <h2 class="card-text--title text-ellipsis">暗网网址整理</h2>
+        <a href="/2021/10/14/%E6%A3%8B%E7%89%8Cnday/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">棋牌nday</h2>
         </a>
       
-      <div class="card-text--row">Newer</div>
+      <div class="card-text--row">Older</div>
     </div>
   </article>
 </div>
-          
           
         </nav>
       
